@@ -58,6 +58,12 @@ float film_thickness(vec2 uv, float time) {
     return max(thickness, 50.0); // minimum ~50nm (black film)
 }
 
+// Helper: signed distance box
+float sdBox(vec2 p, vec2 b) {
+    vec2 d = abs(p) - b;
+    return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
+}
+
 vec3 render_soap_film(vec2 uv, float time) {
     float d = film_thickness(uv, time);
     float n = 1.33; // water
@@ -109,10 +115,4 @@ void main() {
     col *= 0.97 + 0.03 * grain;
     
     gl_FragColor = vec4(col, 1.0);
-}
-
-// Helper: signed distance box
-float sdBox(vec2 p, vec2 b) {
-    vec2 d = abs(p) - b;
-    return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
 }
