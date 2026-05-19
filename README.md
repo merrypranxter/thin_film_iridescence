@@ -11,22 +11,42 @@ This project renders interference phenomena with actual wavelength-based color, 
 ## Project Structure
 
 ```
-shaders/          # GLSL fragments — one per phenomenon
+shaders/          # GLSL fragment shaders — one per phenomenon
 films/            # Thickness maps, refractive indices, spectral data
-phenomena/        # Soap, oil, beetle, nacre, structural color references
-spectra/          # Wavelength-to-RGB conversions, CIE matching
+  refractive_indices.md   # n values for all materials in use
+  thickness_maps.py       # Python: generate 2-D thickness arrays
+phenomena/        # Physics notes for each interference phenomenon
+  soap_film.md
+  oil_slick.md
+  beetle_shell.md
+  nacre.md
+spectra/          # Wavelength-to-colour pipelines
+  wavelength.glsl # GLSL include: XYZ CMFs, sRGB conversion helpers
+  wavelength.py   # Python reference: spectral integration, sRGB output
 ```
 
 ## Running
 
-Shaders are self-contained GLSL fragment shaders. Run in any WebGL environment.
+Shaders are self-contained GLSL fragment shaders. Run in any WebGL environment
+(e.g. [Shadertoy](https://shadertoy.com), [glslViewer](https://github.com/patriciogonzalezvivo/glslViewer),
+or a Three.js `ShaderMaterial`).
+
+The GLSL include `spectra/wavelength.glsl` provides accurate CIE 1931 CMFs and
+sRGB conversion helpers. Copy or `#include` it into any shader.
+
+The Python reference in `spectra/wavelength.py` reproduces the same colour
+pipeline in NumPy for offline validation. Run the thickness-map demos with:
+
+```bash
+python films/thickness_maps.py
+```
 
 ## Current Phenomena
 
-- [ ] _soap_film — draining soap, thickness → color flow, gravity-driven dynamics
-- [ ] _oil_slick — petroleum on water, thickness topology as hue map
-- [ ] _beetle_shell — multi-layer interference, metallic angle-dependent color
-- [ ] _nacre — brick-and-mortar microstructure, diffuse luster
+- [x] _soap_film — draining soap, thickness → color flow, gravity-driven dynamics
+- [x] _oil_slick — petroleum on water, thickness topology as hue map
+- [x] _beetle_shell — multi-layer interference, metallic angle-dependent color
+- [x] _nacre — brick-and-mortar microstructure, diffuse luster
 
 ## Physics Notes
 
