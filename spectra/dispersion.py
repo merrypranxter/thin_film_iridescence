@@ -207,8 +207,8 @@ def thin_film_reflectance_dispersive(lam, d: float, material: str,
     r1 = ((1.0 - n) / (1.0 + n)) ** 2
     r2 = ((n - 1.0) / (n + 1.0)) ** 2
 
-    R = (r1 + r2 + 2.0 * np.sqrt(r1 * r2) * np.cos(delta)) / \
-        (1.0 + r1 * r2 + 2.0 * np.sqrt(r1 * r2) * np.cos(delta))
+    R = (r1 + r2 - 2.0 * np.sqrt(r1 * r2) * np.cos(delta)) / \
+        (1.0 + r1 * r2 - 2.0 * np.sqrt(r1 * r2) * np.cos(delta))
     return R
 
 

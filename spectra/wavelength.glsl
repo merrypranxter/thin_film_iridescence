@@ -106,7 +106,7 @@ float cauchy_n(float lambda, float A, float B) {
 float thin_film_reflectance(float lambda, float d, float n, float cos_theta) {
     float delta = 4.0 * 3.14159265 * n * d * cos_theta / lambda;
     float r = pow((1.0 - n) / (1.0 + n), 2.0);
-    float num = r + r + 2.0 * r * cos(delta);
-    float den = 1.0 + r * r + 2.0 * r * cos(delta);
+    float num = r + r - 2.0 * r * cos(delta);
+    float den = 1.0 + r * r - 2.0 * r * cos(delta);
     return num / den;
 }

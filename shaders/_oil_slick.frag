@@ -23,8 +23,8 @@ float thin_film_reflectance(float lambda, float d, float n, float cos_theta) {
     float delta = 4.0 * 3.14159265 * n * d * cos_theta / lambda;
     float r1 = pow((1.0 - n) / (1.0 + n), 2.0);
     float r2 = pow((n - 1.0) / (n + 1.0), 2.0);
-    float R = r1 + r2 + 2.0 * sqrt(r1 * r2) * cos(delta);
-    R /= (1.0 + r1 * r2 + 2.0 * sqrt(r1 * r2) * cos(delta));
+    float R = r1 + r2 - 2.0 * sqrt(r1 * r2) * cos(delta);
+    R /= (1.0 + r1 * r2 - 2.0 * sqrt(r1 * r2) * cos(delta));
     return R;
 }
 

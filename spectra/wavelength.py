@@ -120,8 +120,8 @@ def thin_film_reflectance(lam: np.ndarray, d: float, n: float,
     r1 = ((1.0 - n) / (1.0 + n)) ** 2            # R at air→film
     r2 = ((n - 1.0) / (n + 1.0)) ** 2            # R at film→air
 
-    R = (r1 + r2 + 2.0 * np.sqrt(r1 * r2) * np.cos(delta)) / \
-        (1.0 + r1 * r2 + 2.0 * np.sqrt(r1 * r2) * np.cos(delta))
+    R = (r1 + r2 - 2.0 * np.sqrt(r1 * r2) * np.cos(delta)) / \
+        (1.0 + r1 * r2 - 2.0 * np.sqrt(r1 * r2) * np.cos(delta))
     return R
 
 

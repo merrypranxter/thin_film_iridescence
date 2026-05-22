@@ -32,8 +32,8 @@ float thin_film_reflectance(float lambda, float d, float n, float cos_theta) {
     float r2 = pow((n - 1.0) / (n + 1.0), 2.0); // film-air on other side
     
     // Interference
-    float R = r1 + r2 + 2.0 * sqrt(r1 * r2) * cos(delta);
-    R /= (1.0 + r1 * r2 + 2.0 * sqrt(r1 * r2) * cos(delta));
+    float R = r1 + r2 - 2.0 * sqrt(r1 * r2) * cos(delta);
+    R /= (1.0 + r1 * r2 - 2.0 * sqrt(r1 * r2) * cos(delta));
     
     return R;
 }
