@@ -33,19 +33,26 @@ def cauchy_n(lam_nm, A: float, B: float, C: float = 0.0):
     return A + B / lam ** 2 + C / lam ** 4
 
 
-def sellmeier_n(lam_um, coeffs: list):
-    """Sellmeier equation: n²(λ) = 1 + Σ Bᵢλ²/(λ²−Cᵢ), λ in µm.
+def sellmeier_n(lam_um, coeffs: list, base: float = 1.0,
+                numerator_has_lam2: bool = True):
+    """Sellmeier equation: n²(λ) = base + Σ termᵢ, λ in µm.
 
     Parameters
     ----------
     lam_um : wavelength(s) in µm
     coeffs : list of (B, C) pairs — Sellmeier oscillator parameters
+    base   : constant term in n²(λ)
+    numerator_has_lam2 : when True use Bλ²/(λ²−C), else use B/(λ²−C)
     """
     lam = np.asarray(lam_um, dtype=float)
     lam2 = lam ** 2
-    n2 = np.ones_like(lam2)
+    n2 = np.full_like(lam2, base, dtype=float)
     for B_i, C_i in coeffs:
-        n2 = n2 + B_i * lam2 / (lam2 - C_i)
+        if numerator_has_lam2:
+            term = B_i * lam2 / (lam2 - C_i)
+        else:
+            term = B_i / (lam2 - C_i)
+        n2 = n2 + term
     return np.sqrt(np.maximum(n2, 1.0))
 
 
@@ -88,9 +95,13 @@ MATERIALS = {
     },
     'aragonite': {
         'model': 'sellmeier',
-        'params': [(0.3314, 0.0239)],
-        'n_550': 1.590,
-        'notes': 'CaCO₃ orthorhombic, ordinary ray (Bragg & Claringbull 1965; λ in µm)',
+        'params': {
+            'coeffs': [(0.01224, 0.0239)],
+            'base': 2.3314,
+            'numerator_has_lam2': False,
+        },
+        'n_550': 1.541,
+        'notes': 'CaCO₃ orthorhombic, ordinary ray Sellmeier fit (Bragg & Claringbull 1965; λ in µm)',
     },
     'organic_matrix': {
         'model': 'cauchy',
@@ -155,7 +166,10 @@ def dispersion_n(material: str, lam_nm):
     if entry['model'] == 'cauchy':
         return cauchy_n(lam, **entry['params'])
     elif entry['model'] == 'sellmeier':
-        return sellmeier_n(lam / 1000.0, entry['params'])
+        params = entry['params']
+        if isinstance(params, dict):
+            return sellmeier_n(lam / 1000.0, **params)
+        return sellmeier_n(lam / 1000.0, params)
     else:
         raise ValueError(f"Unknown model '{entry['model']}'")
 
