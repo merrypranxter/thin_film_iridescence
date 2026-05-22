@@ -87,11 +87,6 @@ n²(λ) = 2.3314 + 0.01224 / (λ² − 0.02390)    (λ in µm)
 
 ---
 
-
----
-
----
-
 ### Keratin (bird feather / butterfly wing)
 `n ≈ 1.53–1.56` at 550 nm
 
