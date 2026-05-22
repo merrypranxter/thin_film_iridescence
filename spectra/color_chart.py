@@ -35,7 +35,7 @@ from dispersion import dispersion_n, thin_film_reflectance_dispersive, MATERIALS
 LAM = np.arange(380.0, 781.0, 5.0)
 # Precompute XYZ white normalisation (∫ Y_bar dλ)
 from wavelength import wavelength_to_XYZ as _xyz
-_white_Y = float(np.trapezoid(_xyz(LAM)[:, 1], LAM))
+_white_Y = float(np.trapz(_xyz(LAM)[:, 1], LAM))
 
 
 def thickness_to_rgb(d: float, material: str) -> tuple:
