@@ -1,9 +1,23 @@
 // spectra/wavelength.glsl
 //
 // Shared wavelength utilities for thin-film GLSL shaders.
-// Include (or copy) into any fragment shader that needs spectral color.
+// Include (or copy) into any fragment shader that needs spectral colour.
 //
-// All wavelengths in nanometres (nm), range 380–780.
+// All wavelengths in nanometres (nm).  Visible range: 380–780 nm.
+//
+// Recommended usage pattern (spectral integration loop):
+//
+//   const float STEP    = 10.0;
+//   const float WHITE_Y = 40.1;   // ∫ Y_bar(λ) dλ, 380–780 step=10
+//   // WHITE_Y at other steps: step=5→80.2, step=15→26.7, step=20→20.1
+//
+//   vec3 XYZ = vec3(0.0);
+//   for (float lam = 380.0; lam <= 780.0; lam += STEP) {
+//       float R = thin_film_reflectance(lam, d, n, cos_theta);
+//       XYZ += wavelength_to_XYZ(lam) * R * STEP;
+//   }
+//   XYZ /= WHITE_Y;   // normalise so perfect white reflector → (1,1,1)
+//   vec3 col = linear_to_sRGB(clamp(XYZ_to_sRGB(XYZ), 0.0, 1.0));
 
 // ──────────────────────────────────────────────────────────────────────────────
 // CIE 1931 colour-matching functions — Gaussian-mixture approximation
@@ -65,14 +79,34 @@ vec3 wavelength_to_rgb_fast(float lambda) {
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
-// Spectral integration helper
-// Call inside a for-loop:
+// Cauchy dispersion: n(λ) = A + B/λ²   (λ in nm)
 //
-//   vec3 XYZ = vec3(0.0);
-//   for (float lam = 380.0; lam <= 780.0; lam += STEP) {
-//       float R = thin_film_reflectance(lam, ...);
-//       XYZ += wavelength_to_XYZ(lam) * R;
-//   }
-//   vec3 col = linear_to_sRGB(clamp(XYZ_to_sRGB(XYZ / NUM_STEPS), 0.0, 1.0));
+// Material constants (A, B in nm²):
+//   water      (1.3247, 3462.0)   soap film ≈ same
+//   oil        (1.433,  6800.0)   mineral oil / petroleum
+//   keratin    (1.532,  5890.0)   butterfly wing, bird feather
 //
+// Usage: float n = cauchy_n(lambda, 1.3247, 3462.0);
 // ──────────────────────────────────────────────────────────────────────────────
+float cauchy_n(float lambda, float A, float B) {
+    return A + B / (lambda * lambda);
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Two-beam thin-film reflectance
+//   lambda    : wavelength (nm)
+//   d         : film thickness (nm)
+//   n         : film refractive index (use cauchy_n() for dispersive media)
+//   cos_theta : cosine of refracted angle inside the film
+//
+// Phase difference:  delta = 4π n d cos(θ') / λ
+// Simplified Fresnel (equal-index media on both sides):
+//   r = ((1−n)/(1+n))²
+// ──────────────────────────────────────────────────────────────────────────────
+float thin_film_reflectance(float lambda, float d, float n, float cos_theta) {
+    float delta = 4.0 * 3.14159265 * n * d * cos_theta / lambda;
+    float r = pow((1.0 - n) / (1.0 + n), 2.0);
+    float num = r + r + 2.0 * r * cos(delta);
+    float den = 1.0 + r * r + 2.0 * r * cos(delta);
+    return num / den;
+}
